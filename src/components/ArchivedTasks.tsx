@@ -122,7 +122,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
       const promises = Array.from(selectedTasks).map(taskId => 
         DatabaseService.updateTask(taskId, {
           archived: false,
-          date_created: formatDate(new Date())
+          date_created: getTodayString()
         })
       );
       
