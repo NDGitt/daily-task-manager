@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { DailyView } from '@/components/DailyView';
 import { ProjectList } from '@/components/ProjectList';
 import { ProjectView } from '@/components/ProjectView';
@@ -39,7 +39,7 @@ export default function Home() {
   const [projectTasks, setProjectTasks] = useState<Task[]>([]);
   const [userSettings, setUserSettings] = useState<UserSettings>(defaultSettings);
   const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived'>('daily');
-  const [loading, setLoading] = useState(false);
+  const [appLoading, setAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [carryOverResult, setCarryOverResult] = useState<{
@@ -62,7 +62,7 @@ export default function Home() {
     if (isAuthenticated && user) {
       loadUserData();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, loadUserData]);
 
 
 
@@ -71,7 +71,7 @@ export default function Home() {
   const loadUserData = async () => {
     if (!user) return;
     
-    setLoading(true);
+    setAppLoading(true);
     setError(null);
     
     try {
@@ -146,9 +146,9 @@ export default function Home() {
           .catch(console.error);
       }, 1500); // Slightly longer delay to ensure UI is ready
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading user data:', err);
-      setError(err.message || 'Failed to load data');
+      setError(err instanceof Error ? err.message : 'Failed to load data');
       
       // Fallback to localStorage for development
     const savedTasks = localStorage.getItem('daily-tasks');
@@ -161,7 +161,7 @@ export default function Home() {
         }
       }
     } finally {
-      setLoading(false);
+      setAppLoading(false);
     }
   };
 
@@ -260,9 +260,9 @@ export default function Home() {
       // Update local state
       setTasks(newTasks);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating tasks:', err);
-      setError(err.message || 'Failed to update tasks');
+      setError(err instanceof Error ? err.message : 'Failed to update tasks');
       
       // Fallback to localStorage
       setTasks(newTasks);

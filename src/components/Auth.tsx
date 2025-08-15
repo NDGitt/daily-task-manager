@@ -29,8 +29,8 @@ export function Auth({ onAuthSuccess }: AuthProps) {
         await signInWithEmail(email, password);
         onAuthSuccess?.();
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }

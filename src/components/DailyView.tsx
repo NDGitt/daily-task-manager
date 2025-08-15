@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React from 'react';
 import { Calendar, FolderOpen, Settings, AlertCircle } from 'lucide-react';
 import { TaskList } from './TaskList';
 import { ManualCarryOver } from './ManualCarryOver';
-import { cn, formatDate, getTodayString } from '@/lib/utils';
+import { formatDate, getTodayString } from '@/lib/utils';
 import type { Task, UserSettings } from '@/types';
 
 interface DailyViewProps {
@@ -31,7 +31,7 @@ export function DailyView({
   const today = getTodayString();
   const todayFormatted = formatDate(today);
   const completedTasks = tasks.filter(task => task.completed);
-  const incompleteTasks = tasks.filter(task => !task.completed);
+  // const incompleteTasks = tasks.filter(task => !task.completed);
 
   // Check for carry-over prompts
   const carryOverTasks = tasks.filter(task => task.carry_over_count >= 2);
@@ -91,7 +91,7 @@ export function DailyView({
               <div className="space-y-2 mt-3">
                 {carryOverTasks.slice(0, 3).map(task => (
                   <div key={task.id} className="text-sm text-blue-800">
-                    • "{task.content}" ({task.carry_over_count} times)
+                    • &quot;{task.content}&quot; ({task.carry_over_count} times)
                   </div>
                 ))}
                 {carryOverTasks.length > 3 && (

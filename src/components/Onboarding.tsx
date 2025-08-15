@@ -82,7 +82,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <div className="bg-green-50 p-4 rounded-lg">
               <h4 className="font-medium text-green-800 mb-2">Task Overload Detection</h4>
               <p className="text-sm text-green-700">
-                When you have too many tasks, we'll suggest using the Eisenhower Matrix to prioritize.
+                When you have too many tasks, we&apos;ll suggest using the Eisenhower Matrix to prioritize.
               </p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
@@ -130,14 +130,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               </ul>
             </div>
             <p className="text-sm text-gray-500">
-              Access projects via the "Projects" button when you need them.
+              Access projects via the &quot;Projects&quot; button when you need them.
             </p>
           </div>
         </div>
       )
     },
     {
-      title: "You're All Set!",
+      title: "You&apos;re All Set!",
       subtitle: "Ready to start your productive journey",
       content: (
         <div className="text-center space-y-6">
@@ -147,7 +147,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </p>
           <div className="bg-blue-50 p-4 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Tip:</strong> Don't worry about getting everything perfect. The app is designed to be forgiving and flexible.
+              <strong>Tip:</strong> Don&apos;t worry about getting everything perfect. The app is designed to be forgiving and flexible.
             </p>
           </div>
           <div className="text-sm text-gray-500">
