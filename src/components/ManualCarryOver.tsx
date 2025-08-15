@@ -64,17 +64,10 @@ export function ManualCarryOver({ userId, onTasksCarriedOver }: ManualCarryOverP
       const selectedTaskList = incompleteTasks.filter(task => selectedTasks.has(task.id));
       const allCarriedTasks: Task[] = [];
 
-      // Group tasks by date and carry them over
-      const tasksByDate = selectedTaskList.reduce((acc, task) => {
-        const date = task.date_created;
-        if (!acc[date]) acc[date] = [];
-        acc[date].push(task);
-        return acc;
-      }, {} as Record<string, Task[]>);
-
-      for (const [date, tasks] of Object.entries(tasksByDate)) {
-        const result = await DatabaseService.carryOverIncompleteTasks(userId, date);
-        allCarriedTasks.push(...result.carriedTasks);
+      // Create new tasks for today from the selected tasks
+      for (const task of selectedTaskList) {
+        const carriedTask = await DatabaseService.createTask(userId, task.content);
+        allCarriedTasks.push(carriedTask);
       }
 
       onTasksCarriedOver(allCarriedTasks);
