@@ -311,7 +311,6 @@ export default function Home() {
       
       // Update the restored task to match the original task's state
       let finalTask = restoredTask;
-      let newTasks: Task[];
       
       if (deletedTask.completed !== restoredTask.completed || 
           deletedTask.date_completed !== restoredTask.date_completed ||
