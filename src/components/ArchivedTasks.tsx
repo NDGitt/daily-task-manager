@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Archive, Search, Filter, CheckCircle, Circle, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { formatDate, getTodayString } from '@/lib/utils';
+import { formatDate, getTodayString, getYesterdayString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface ArchivedTasksProps {
@@ -188,13 +188,10 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
 
   const getDateLabel = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00');
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
 
-    if (dateStr === formatDate(today)) {
+    if (dateStr === getTodayString()) {
       return 'Today';
-    } else if (dateStr === formatDate(yesterday)) {
+    } else if (dateStr === getYesterdayString()) {
       return 'Yesterday';
     } else {
       return date.toLocaleDateString('en-US', { 
