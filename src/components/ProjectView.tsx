@@ -27,7 +27,6 @@ export function ProjectView({
 }: ProjectViewProps) {
   const [showMenu, setShowMenu] = useState(false);
   const completedTasks = tasks.filter(task => task.completed);
-  const incompleteTasks = tasks.filter(task => !task.completed);
 
   // Close menu when clicking outside
   useEffect(() => {

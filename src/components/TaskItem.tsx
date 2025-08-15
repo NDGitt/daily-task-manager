@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Check, X, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Task, TaskItemProps, UserSettings } from '@/types';
+import type { TaskItemProps, UserSettings } from '@/types';
 
 export function TaskItem({ 
   task, 

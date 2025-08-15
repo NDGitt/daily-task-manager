@@ -61,7 +61,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
              <div className="flex items-start space-x-3">
                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">4</div>
                <div>
-                 <p className="font-medium">Clean slate when you're away</p>
+                 <p className="font-medium">Clean slate when you&apos;re away</p>
                  <p className="text-sm text-gray-600">If you don&apos;t use the app for a day, carried-over tasks are archived to keep your workspace clutter-free</p>
                </div>
              </div>

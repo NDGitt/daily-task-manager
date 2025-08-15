@@ -408,18 +408,7 @@ export class DatabaseService {
     })).sort((a, b) => b.date.localeCompare(a.date)); // Most recent first
   }
 
-  // Delete a task permanently
-  static async deleteTask(taskId: string): Promise<void> {
-    const { error } = await supabase
-      .from('tasks')
-      .delete()
-      .eq('id', taskId);
 
-    if (error) {
-      console.error('Error deleting task:', error);
-      throw error;
-    }
-  }
 
   // Move tasks from project to daily view
   static async moveTasksToDaily(taskIds: string[]): Promise<void> {
@@ -600,10 +589,10 @@ export class DatabaseService {
       } else if (completedProjects) {
         const projectsToArchive = completedProjects.filter(project => {
           const tasks = project.tasks || [];
-          const activeTasks = tasks.filter((task: any) => !task.archived);
+          const activeTasks = tasks.filter((task: { archived: boolean; completed: boolean }) => !task.archived);
           
           // Archive if all active tasks are completed and there's at least one task
-          return activeTasks.length > 0 && activeTasks.every((task: any) => task.completed);
+          return activeTasks.length > 0 && activeTasks.every((task: { completed: boolean }) => task.completed);
         });
 
         if (projectsToArchive.length > 0) {
@@ -709,7 +698,7 @@ export class DatabaseService {
 
   // Ensure user profile exists
   static async ensureUserProfile(userId: string, email: string): Promise<void> {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('users')
       .select('id')
       .eq('id', userId)

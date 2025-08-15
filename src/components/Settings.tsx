@@ -136,7 +136,7 @@ export function Settings({ settings, onSaveSettings, onBack, onShowPreviousDays,
                         name="task_completion_visual"
                         value={option.value}
                         checked={localSettings.task_completion_visual === option.value}
-                        onChange={(e) => updateSetting('task_completion_visual', e.target.value as any)}
+                        onChange={(e) => updateSetting('task_completion_visual', e.target.value as 'change_color' | 'no_change')}
                         className="mt-1 w-4 h-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
                       <div>
@@ -164,7 +164,7 @@ export function Settings({ settings, onSaveSettings, onBack, onShowPreviousDays,
                         name="task_completion_behavior"
                         value={option.value}
                         checked={localSettings.task_completion_behavior === option.value}
-                        onChange={(e) => updateSetting('task_completion_behavior', e.target.value as any)}
+                        onChange={(e) => updateSetting('task_completion_behavior', e.target.value as 'stay_visible' | 'move_to_bottom' | 'hide')}
                         className="mt-1 w-4 h-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
                       <div>

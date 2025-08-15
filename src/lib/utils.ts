@@ -18,7 +18,6 @@ export const getYesterdayString = (): string => {
 
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   
@@ -89,7 +88,7 @@ export const getStorageKey = (userId: string, key: string): string => {
   return `dtm_${userId}_${key}`;
 };
 
-export const saveToLocalStorage = (key: string, data: any): void => {
+export const saveToLocalStorage = (key: string, data: unknown): void => {
   if (typeof window !== 'undefined') {
     localStorage.setItem(key, JSON.stringify(data));
   }

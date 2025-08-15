@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, CheckCircle, Circle, TrendingUp } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { formatDate, getTodayString } from '@/lib/utils';
+import { getTodayString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface PreviousDaysProps {
@@ -90,7 +90,6 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay()); // Start from Sunday
 

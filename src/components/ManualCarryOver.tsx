@@ -133,7 +133,7 @@ export function ManualCarryOver({ userId, onTasksCarriedOver }: ManualCarryOverP
             <div className="space-y-4">
               {Object.entries(tasksByDate)
                 .sort(([a], [b]) => b.localeCompare(a)) // Most recent first
-                .map(([date, tasks]) => (
+                .map(([date, _tasks]) => (
                   <div key={date} className="space-y-2">
                     <h3 className="font-medium text-gray-900 flex items-center gap-2">
                       <Calendar size={16} />

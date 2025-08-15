@@ -188,7 +188,11 @@ export function ProjectList({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    showArchived ? onUnarchiveProject(project.id) : onArchiveProject(project.id);
+                    if (showArchived) {
+                      onUnarchiveProject(project.id);
+                    } else {
+                      onArchiveProject(project.id);
+                    }
                   }}
                   className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                   title={showArchived ? "Unarchive project" : "Archive project"}
