@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
-import { Calendar, FolderOpen, Settings, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, FolderOpen, Settings, AlertCircle, Menu, X, ArrowLeft } from 'lucide-react';
 import { TaskList } from './TaskList';
 import { ManualCarryOver } from './ManualCarryOver';
-import { formatDate, getTodayString } from '@/lib/utils';
+import { getTodayString } from '@/lib/utils';
 import type { Task, UserSettings } from '@/types';
 
 interface DailyViewProps {
@@ -28,52 +28,124 @@ export function DailyView({
   onShowSettings,
   onShowPreviousDays
 }: DailyViewProps) {
-  const today = getTodayString();
-  const todayFormatted = formatDate(today);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const today = new Date();
+  const todayFormatted = today.toLocaleDateString('en-US', { 
+    weekday: 'long',
+    month: 'long', 
+    day: 'numeric'
+  });
   const completedTasks = tasks.filter(task => task.completed);
-  // const incompleteTasks = tasks.filter(task => !task.completed);
 
   // Check for carry-over prompts
   const carryOverTasks = tasks.filter(task => task.carry_over_count >= 2);
 
+  const handleCarryOverComplete = (carriedTasks: Task[]) => {
+    const updatedTasks = [...tasks, ...carriedTasks];
+    onTasksChange(updatedTasks);
+    setIsSidebarOpen(false); // Close sidebar after carry over
+  };
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{todayFormatted}</h1>
-          {tasks.length > 0 && (
-            <p className="text-gray-600 mt-1">
-              {completedTasks.length} of {tasks.length} tasks completed
-            </p>
-          )}
-        </div>
-        
-        {/* Hidden controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onShowPreviousDays}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            title="Previous days"
-          >
-            <Calendar size={20} />
-          </button>
-          <button
-            onClick={onShowProjects}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            title="Projects"
-          >
-            <FolderOpen size={20} />
-          </button>
-          <button
-            onClick={onShowSettings}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            title="Settings"
-          >
-            <Settings size={20} />
-          </button>
+    <>
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 ${
+        isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        <div className="p-6">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Menu Items */}
+          <div className="space-y-4">
+            {/* Carry Over Tasks */}
+            <div className="border-b border-gray-200 pb-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Quick Actions</h3>
+              <ManualCarryOver
+                userId={userId}
+                onTasksCarriedOver={handleCarryOverComplete}
+              />
+            </div>
+
+            {/* Navigation */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Navigation</h3>
+              
+              <button
+                onClick={() => {
+                  onShowPreviousDays();
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Calendar size={20} />
+                <span>Previous Days</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onShowProjects();
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <FolderOpen size={20} />
+                <span>Projects</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onShowSettings();
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Settings size={20} />
+                <span>Settings</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Clean Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{todayFormatted}</h1>
+            {tasks.length > 0 && (
+              <p className="text-gray-600 mt-1">
+                {completedTasks.length} of {tasks.length} tasks completed
+              </p>
+            )}
+          </div>
+          
+          {/* Menu Button */}
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            title="Menu"
+          >
+            <Menu size={24} />
+          </button>
+        </div>
 
 
 
@@ -117,18 +189,7 @@ export function DailyView({
         </div>
       )}
 
-      {/* Manual Carry Over */}
-      <div className="flex justify-between items-center mb-4">
-        <div></div>
-        <ManualCarryOver
-          userId={userId}
-          onTasksCarriedOver={(carriedTasks) => {
-            // Add carried tasks to current tasks
-            const updatedTasks = [...tasks, ...carriedTasks];
-            onTasksChange(updatedTasks);
-          }}
-        />
-      </div>
+
 
       {/* Task List */}
               <TaskList
@@ -140,14 +201,15 @@ export function DailyView({
 
 
 
-      {/* Completion Message */}
-      {tasks.length > 0 && completedTasks.length === tasks.length && (
-        <div className="text-center py-8">
-          <div className="text-2xl mb-2">🎉</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">All done for today!</h3>
-          <p className="text-gray-600">Great job completing all your tasks.</p>
-        </div>
-      )}
-    </div>
+        {/* Completion Message */}
+        {tasks.length > 0 && completedTasks.length === tasks.length && (
+          <div className="text-center py-8">
+            <div className="text-2xl mb-2">🎉</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">All done for today!</h3>
+            <p className="text-gray-600">Great job completing all your tasks.</p>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
