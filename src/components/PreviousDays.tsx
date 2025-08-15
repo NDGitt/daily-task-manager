@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, CheckCircle, Circle, TrendingUp } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getTodayString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface PreviousDaysProps {
@@ -31,14 +31,19 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
     loadMonthlySummaries();
   }, [currentMonth, userId]);
 
+  // Helper function to convert Date to date string
+  const dateToDateString = (date: Date): string => {
+    return date.toISOString().split('T')[0];
+  };
+
   const loadMonthlySummaries = async () => {
     setLoading(true);
     try {
       const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
       const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
       
-      const startDateStr = formatDate(startDate);
-      const endDateStr = formatDate(endDate);
+      const startDateStr = dateToDateString(startDate);
+      const endDateStr = dateToDateString(endDate);
       
       const summaries = await DatabaseService.getDailyTaskSummaries(userId, startDateStr, endDateStr);
       setDailySummaries(summaries);
@@ -94,9 +99,9 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
 
     // Generate 6 weeks (42 days) to fill the calendar grid
     for (let i = 0; i < 42; i++) {
-      const dateStr = formatDate(currentDate);
+      const dateStr = dateToDateString(currentDate);
       const isCurrentMonth = currentDate.getMonth() === month;
-      const isToday = dateStr === formatDate(new Date());
+      const isToday = dateStr === getTodayString();
       const summary = getSummaryForDate(dateStr);
       const hasData = summary && summary.total_tasks > 0;
 
