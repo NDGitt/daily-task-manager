@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Archive, Search, Filter, CheckCircle, Circle, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
 import { getTodayString, getYesterdayString } from '@/lib/utils';
@@ -34,7 +34,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
     }
   }, [selectedDate, archivedTasks, searchQuery, filterType]);
 
-  const loadArchivedTasks = async () => {
+  const loadArchivedTasks = useCallback(async () => {
     setLoading(true);
     try {
       const tasks = await DatabaseService.getArchivedTasks(userId, 200); // Load more for better browsing
@@ -44,9 +44,9 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
-  const applyFiltersToDateTasks = (dateTasks: Task[]) => {
+  const applyFiltersToDateTasks = useCallback((dateTasks: Task[]) => {
     let filtered = [...dateTasks];
 
     // Apply completion filter
@@ -65,7 +65,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
     }
 
     setSelectedDateTasks(filtered);
-  };
+  }, [filterType, searchQuery]);
 
   const handleTaskSelect = (taskId: string) => {
     const newSelected = new Set(selectedTasks);

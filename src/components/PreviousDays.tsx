@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, CheckCircle, Circle, TrendingUp } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
 import { getTodayString } from '@/lib/utils';
@@ -36,7 +36,7 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
     return date.toISOString().split('T')[0];
   };
 
-  const loadMonthlySummaries = async () => {
+  const loadMonthlySummaries = useCallback(async () => {
     setLoading(true);
     try {
       const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
@@ -52,7 +52,7 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth, userId]);
 
   const loadTasksForDate = async (date: string) => {
     setTasksLoading(true);

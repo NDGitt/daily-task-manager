@@ -138,10 +138,10 @@ export function ManualCarryOver({ userId, onTasksCarriedOver }: ManualCarryOverP
                     <h3 className="font-medium text-gray-900 flex items-center gap-2">
                       <Calendar size={16} />
                       {formatDate(date)}
-                      <span className="text-sm text-gray-500">({tasks.length} tasks)</span>
+                      <span className="text-sm text-gray-500">({_tasks.length} tasks)</span>
                     </h3>
                     <div className="space-y-2 ml-6">
-                      {tasks.map((task) => (
+                      {_tasks.map((task) => (
                         <label
                           key={task.id}
                           className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer"
