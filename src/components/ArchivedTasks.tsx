@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Archive, Search, Filter, CheckCircle, Circle, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { formatDate, getTodayString, getYesterdayString } from '@/lib/utils';
+import { getTodayString, getYesterdayString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface ArchivedTasksProps {
