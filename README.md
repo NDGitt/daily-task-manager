@@ -1,122 +1,112 @@
-# My Diary - Daily Task Manager
+# My Diary - Minimalist Daily Task Manager
 
-A minimalist daily task manager designed to emulate the experience of writing tasks on a piece of paper. Built with Next.js, TypeScript, and Tailwind CSS.
+A cross-platform, minimalist task manager designed to emulate the experience of writing tasks on a piece of paper. The app is focused on daily task logging with minimal clutter, optional project-based lists, and gentle, rule-based smart features that support productivity without overwhelming the user.
 
 ## 🌟 Features
 
-### ✅ Implemented (MVP)
-- **Daily Task List**: Clean, paper-like interface for today's tasks
-- **Task Operations**: Add, edit, complete, delete, and reorder tasks
-- **Drag & Drop**: Intuitive task reordering
-- **Eisenhower Matrix**: Organize tasks by urgency and importance when overloaded
-- **Smart Suggestions**: Task overload detection and carry-over warnings
-- **Local Storage**: Persistent task storage (temporary until Supabase integration)
+### Core Functionality
+- **Daily Task Log**: One task list per day, just like paper
+- **Simple Task Management**: Add, complete, and reorder tasks with ease
+- **Task Carry-Over**: Incomplete tasks automatically carry over to the next day
+- **Clean Slate Philosophy**: If you don't use the app for a day, carried-over tasks are archived to maintain a clutter-free environment
 
-### 🚧 Coming Soon
-- **User Authentication**: Secure login with Supabase Auth
-- **Database Integration**: Full Supabase backend integration
-- **Task Carry-Over**: Automatic carry-over of incomplete tasks
-- **Project Pages**: Optional project-based task lists
-- **Settings**: Customizable behavior and preferences
-- **Previous Days**: View and manage historical tasks
+### Smart Features
+- **Task Overload Detection**: Suggests using the Eisenhower Matrix when you have too many tasks
+- **Carry-Over Management**: Special attention for tasks that carry over multiple days
+- **Project Archiving**: Automatic suggestions for archiving inactive projects
+- **Eisenhower Matrix**: Drag-and-drop task prioritization
 
-## 🚀 Getting Started
+### Optional Projects
+- **Project Lists**: Separate task lists for specific events, trips, or projects
+- **Hidden by Default**: Projects are hidden to keep the daily view clean
+- **Auto-Archiving**: Inactive projects are suggested for archiving
 
-1. **Clone and Install**:
-   ```bash
-   git clone <your-repo>
-   cd my-diary
-   npm install
-   ```
+### User Experience
+- **Onboarding Flow**: Guided introduction for new users
+- **Minimalist Interface**: Clean, distraction-free design
+- **Responsive Design**: Works on desktop and mobile
+- **Settings Customization**: Tailor the app to your preferences
 
-2. **Run Development Server**:
-   ```bash
-   npm run dev
-   ```
+## 🚀 Quick Start
 
-3. **Open in Browser**:
-   Visit [http://localhost:3000](http://localhost:3000)
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account (free)
+
+### Local Development
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/daily-task-manager.git
+cd daily-task-manager
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
+
+# Run the development server
+npm run dev
+```
+
+### Environment Variables
+Create a `.env.local` file with:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## 🗄️ Database Setup
+
+1. Create a new Supabase project
+2. Run the schema from `supabase-schema.sql` in the SQL Editor
+3. Configure authentication settings
+4. Add your local development URL to allowed sites
+
+## 🎯 Philosophy
+
+**Less is more.** This app is designed for users who:
+- Value simplicity over complexity
+- Want to focus on today's tasks without distraction
+- Appreciate gentle smart features that don't interrupt workflow
+- Prefer a clean, paper-like experience
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15 with React 18
-- **Language**: TypeScript
+- **Frontend**: Next.js 14, React, TypeScript
 - **Styling**: Tailwind CSS
-- **Drag & Drop**: @hello-pangea/dnd
-- **Icons**: Lucide React
-- **Backend** (planned): Supabase
-- **Deployment** (planned): Vercel
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Deployment**: Vercel
+- **Database**: PostgreSQL with Row Level Security
 
-## 🎯 Design Philosophy
+## 📱 Screenshots
 
-This app prioritizes:
-- **Simplicity**: Minimal UI without distractions
-- **Focus**: Single daily task list by default
-- **Natural Interaction**: Drag-and-drop, inline editing
-- **Smart Assistance**: Gentle, rule-based suggestions
-- **Accessibility**: Clean typography and intuitive navigation
-
-## 📱 Usage
-
-1. **Add Tasks**: Click the "+" button or "Add a task"
-2. **Edit Tasks**: Click on any task to edit inline
-3. **Complete Tasks**: Click the circle to mark complete
-4. **Reorder**: Drag and drop tasks to reorder
-5. **Matrix View**: When you have 8+ tasks, use the Eisenhower Matrix to prioritize
-6. **Navigation**: Use the subtle icons in the top-right for Projects, Previous Days, and Settings
-
-## 🔧 Development
-
-### Project Structure
-```
-src/
-├── app/              # Next.js app router
-├── components/       # React components
-├── lib/             # Utilities and services
-├── types/           # TypeScript interfaces
-└── styles/          # Global styles
-```
-
-### Key Components
-- `DailyView`: Main daily task interface
-- `TaskList`: Task list with drag-and-drop
-- `TaskItem`: Individual task component
-- `EisenhowerMatrix`: Priority matrix for task organization
-
-## 🗄️ Data Model
-
-```typescript
-interface Task {
-  id: string;
-  user_id: string;
-  content: string;
-  date_created: string;
-  completed: boolean;
-  order: number;
-  carry_over_count: number;
-  eisenhower_quadrant?: 1 | 2 | 3 | 4;
-}
-```
-
-## 🎨 Customization
-
-The app will support various customization options:
-- Task completion behavior (color change, move to bottom, hide, stay visible)
-- Smart suggestions toggle
-- Task overload threshold
-- Theme preferences
+*Screenshots coming soon*
 
 ## 🚀 Deployment
 
-Ready for deployment to Vercel:
-1. Connect your GitHub repository to Vercel
-2. Configure environment variables for Supabase
-3. Deploy automatically on push
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions to Vercel.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License - feel free to use this project as a starting point for your own task manager!
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Inspired by the simplicity of paper-based task management
+- Built for users with ADHD and attention sensitivities
+- Designed to reduce digital clutter and improve focus
 
 ---
 
-Built with ❤️ for productivity and focus.
+**Built with ❤️ for productive, focused task management**
