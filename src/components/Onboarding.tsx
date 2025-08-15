@@ -58,13 +58,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                  <p className="text-sm text-gray-600">Tomorrow&apos;s list automatically includes unfinished items</p>
                </div>
              </div>
-             <div className="flex items-start space-x-3">
-               <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">4</div>
-               <div>
-                 <p className="font-medium">Complete tasks at your pace</p>
-                 <p className="text-sm text-gray-600">Mark tasks as done when finished, or let them carry over to tomorrow</p>
-               </div>
-             </div>
           </div>
         </div>
       )
