@@ -137,7 +137,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       )
     },
     {
-      title: "You&apos;re All Set!",
+      title: "You're All Set!",
       subtitle: "Ready to start your productive journey",
       content: (
         <div className="text-center space-y-6">
