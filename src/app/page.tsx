@@ -57,17 +57,7 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
 
-  // Load user data when authenticated
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      loadUserData();
-    }
-  }, [isAuthenticated, user, loadUserData]);
-
-
-
-
-
+  // Define loadUserData before using it in useEffect
   const loadUserData = useCallback(async () => {
     if (!user) return;
     
@@ -164,6 +154,17 @@ export default function Home() {
       // setAppLoading(false);
     }
   }, [user, onboardingChecked]);
+
+  // Load user data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadUserData();
+    }
+  }, [isAuthenticated, user, loadUserData]);
+
+
+
+
 
   const handleTasksChange = async (newTasks: Task[]) => {
     console.log('handleTasksChange called with user:', user?.id);
