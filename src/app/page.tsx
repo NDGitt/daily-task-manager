@@ -24,7 +24,6 @@ const defaultSettings: UserSettings = {
   task_completion_visual: 'change_color',
   smart_suggestions_enabled: true,
   task_overload_threshold: 15,
-
   project_auto_archive_days: 7,
   project_archive_completed: true
 };
@@ -41,6 +40,8 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived'>('daily');
   // const [appLoading, setAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+
 
   const [carryOverResult, setCarryOverResult] = useState<{
     carriedTasks: Task[];
@@ -657,7 +658,7 @@ export default function Home() {
   }
 
   return (
-    <div className={`min-h-screen transition-colors ${currentView === 'settings' ? '' : 'bg-gray-50 dark:bg-gray-900'}`}>
+    <div className="min-h-screen bg-gray-50">
       <div className={`${currentView === 'settings' ? '' : 'container mx-auto px-4 py-8'}`}>
             {/* Carry-over notification */}
             {showCarryOverNotification && carryOverResult && (

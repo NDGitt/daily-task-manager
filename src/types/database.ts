@@ -116,5 +116,4 @@ export interface UserSettings {
   task_completion_behavior: 'change_color' | 'move_to_bottom' | 'hide' | 'stay_visible';
   smart_suggestions_enabled: boolean;
   task_overload_threshold: number;
-  theme: 'light' | 'dark' | 'system';
 }
