@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Archive, Search, Filter, CheckCircle, Circle, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getTodayString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface ArchivedTasksProps {
@@ -102,7 +102,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
       // Update task to be unarchived and move to today
       await DatabaseService.updateTask(taskId, {
         archived: false,
-        date_created: formatDate(new Date()) // Move to today
+        date_created: getTodayString() // Move to today
       });
       
       // Remove from local state
