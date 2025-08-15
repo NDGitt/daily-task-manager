@@ -21,7 +21,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </p>
           <div className="bg-blue-50 p-4 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Philosophy:</strong> Less is more. Focus on today's tasks without the clutter of complex project management.
+              <strong>Philosophy:</strong> Less is more. Focus on today&apos;s tasks without the clutter of complex project management.
             </p>
           </div>
         </div>
@@ -55,14 +55,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">3</div>
                <div>
                  <p className="font-medium">Incomplete tasks carry over</p>
-                 <p className="text-sm text-gray-600">Tomorrow's list automatically includes unfinished items</p>
+                 <p className="text-sm text-gray-600">Tomorrow&apos;s list automatically includes unfinished items</p>
                </div>
              </div>
              <div className="flex items-start space-x-3">
                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">4</div>
                <div>
                  <p className="font-medium">Clean slate when you're away</p>
-                 <p className="text-sm text-gray-600">If you don't use the app for a day, carried-over tasks are archived to keep your workspace clutter-free</p>
+                 <p className="text-sm text-gray-600">If you don&apos;t use the app for a day, carried-over tasks are archived to keep your workspace clutter-free</p>
                </div>
              </div>
           </div>
@@ -100,7 +100,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
              <div className="bg-blue-50 p-4 rounded-lg">
                <h4 className="font-medium text-blue-800 mb-2">Clean Slate Philosophy</h4>
                <p className="text-sm text-blue-700">
-                 If you don't use the app for a day, carried-over tasks are automatically archived. This ensures you always start with a fresh, uncluttered workspace.
+                 If you don&apos;t use the app for a day, carried-over tasks are automatically archived. This ensures you always start with a fresh, uncluttered workspace.
                </p>
              </div>
           </div>
@@ -143,7 +143,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         <div className="text-center space-y-6">
           <div className="text-6xl mb-4">🎉</div>
           <p className="text-lg text-gray-600">
-            Your minimalist task manager is ready. Start with today's tasks and let the app adapt to your workflow.
+            Your minimalist task manager is ready. Start with today&apos;s tasks and let the app adapt to your workflow.
           </p>
           <div className="bg-blue-50 p-4 rounded-lg">
             <p className="text-sm text-blue-800">

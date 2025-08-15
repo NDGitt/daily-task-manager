@@ -69,7 +69,7 @@ export function UndoNotification({
                 Task deleted
               </p>
               <p className="text-sm text-gray-300 truncate">
-                "{deletedTask.content}"
+                &quot;{deletedTask.content}&quot;
               </p>
             </div>
             

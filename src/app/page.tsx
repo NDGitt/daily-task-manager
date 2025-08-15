@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DailyView } from '@/components/DailyView';
 import { ProjectList } from '@/components/ProjectList';
 import { ProjectView } from '@/components/ProjectView';
@@ -39,7 +39,7 @@ export default function Home() {
   const [projectTasks, setProjectTasks] = useState<Task[]>([]);
   const [userSettings, setUserSettings] = useState<UserSettings>(defaultSettings);
   const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived'>('daily');
-  const [appLoading, setAppLoading] = useState(false);
+  // const [appLoading, setAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [carryOverResult, setCarryOverResult] = useState<{
@@ -68,10 +68,10 @@ export default function Home() {
 
 
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     if (!user) return;
     
-    setAppLoading(true);
+    // setAppLoading(true);
     setError(null);
     
     try {
@@ -161,9 +161,9 @@ export default function Home() {
         }
       }
     } finally {
-      setAppLoading(false);
+      // setAppLoading(false);
     }
-  };
+  }, [user, onboardingChecked]);
 
   const handleTasksChange = async (newTasks: Task[]) => {
     console.log('handleTasksChange called with user:', user?.id);
@@ -330,7 +330,7 @@ export default function Home() {
       }
       
       // Insert the task back at its original position
-      newTasks = [...tasks];
+      const newTasks = [...tasks];
       newTasks.splice(deletedTaskIndex, 0, finalTask);
       setTasks(newTasks);
 
@@ -590,7 +590,7 @@ export default function Home() {
           console.log('Tasks found:', todaysProjectTasks.map(t => t.content));
           
           // Create a global function to move tasks back
-          (window as any).moveTasksToDaily = async () => {
+          (window as Window & { moveTasksToDaily?: () => Promise<void> }).moveTasksToDaily = async () => {
             try {
               const taskIds = todaysProjectTasks.map(t => t.id);
               await DatabaseService.moveTasksToDaily(taskIds);

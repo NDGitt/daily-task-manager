@@ -12,7 +12,7 @@ export function TaskList({
   onTasksChange, 
   onDeleteTask,
   userSettings,
-  isMatrixMode = false 
+  // isMatrixMode = false 
 }: TaskListProps) {
   const [newTaskContent, setNewTaskContent] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -130,7 +130,7 @@ export function TaskList({
               {tasks.length === 0 && !isAddingTask && (
                 <div className="text-center py-8 text-gray-400">
                   <div className="text-base mb-1">No tasks yet</div>
-                  <div className="text-sm">Click "Add a task" below to get started</div>
+                  <div className="text-sm">Click &quot;Add a task&quot; below to get started</div>
                 </div>
               )}
 
