@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Archive, Search, Filter, CheckCircle, Circle, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getTodayString, getYesterdayString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface ArchivedTasksProps {
@@ -102,7 +102,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
       // Update task to be unarchived and move to today
       await DatabaseService.updateTask(taskId, {
         archived: false,
-        date_created: formatDate(new Date()) // Move to today
+        date_created: getTodayString() // Move to today
       });
       
       // Remove from local state
@@ -122,7 +122,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
       const promises = Array.from(selectedTasks).map(taskId => 
         DatabaseService.updateTask(taskId, {
           archived: false,
-          date_created: formatDate(new Date())
+          date_created: getTodayString()
         })
       );
       
@@ -188,13 +188,10 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
 
   const getDateLabel = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00');
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
 
-    if (dateStr === formatDate(today)) {
+    if (dateStr === getTodayString()) {
       return 'Today';
-    } else if (dateStr === formatDate(yesterday)) {
+    } else if (dateStr === getYesterdayString()) {
       return 'Yesterday';
     } else {
       return date.toLocaleDateString('en-US', { 
