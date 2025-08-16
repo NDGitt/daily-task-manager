@@ -1,0 +1,47 @@
+{
+  "name": "My Diary",
+  "short_name": "My Diary",
+  "description": "A daily task manager and diary app to help you organize your day",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Tasks",
+      "short_name": "Today",
+      "description": "View today's tasks",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/app-icon.png",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "short_name": "Projects",
+      "description": "View your projects",
+      "url": "/?view=projects",
+      "icons": [
+        {
+          "src": "/app-icon.png",
+          "sizes": "any"
+        }
+      ]
+    }
+  ]
+}

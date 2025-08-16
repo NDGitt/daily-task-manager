@@ -12,6 +12,8 @@ import { Onboarding } from '@/components/Onboarding';
 import { CarryOverNotification } from '@/components/CarryOverNotification';
 import { MultiTaskUndoNotification } from '@/components/MultiTaskUndoNotification';
 import { Help } from '@/components/Help';
+import { PWAInstall } from '@/components/PWAInstall';
+import { MyAccount } from '@/components/MyAccount';
 import { useAuth } from '@/hooks/useAuth';
 import { DatabaseService } from '@/lib/database';
 import { getTodayString } from '@/lib/utils';
@@ -38,7 +40,7 @@ export default function Home() {
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [projectTasks, setProjectTasks] = useState<Task[]>([]);
   const [userSettings, setUserSettings] = useState<UserSettings>(defaultSettings);
-  const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived' | 'help'>('daily');
+  const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived' | 'help' | 'account'>('daily');
   // const [appLoading, setAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -323,6 +325,16 @@ export default function Home() {
 
   const handleShowHelp = () => {
     setCurrentView('help');
+  };
+
+  const handleShowAccount = () => {
+    setCurrentView('account');
+  };
+
+  const handleSignOut = () => {
+    // The useAuth hook will handle the sign out state automatically
+    // This function can be used for any additional cleanup if needed
+    console.log('User signed out');
   };
 
   const handleDeleteTask = (taskToDelete: Task) => {
@@ -743,6 +755,8 @@ export default function Home() {
             onShowSettings={handleShowSettings}
             onShowPreviousDays={handleShowPreviousDays}
             onShowHelp={handleShowHelp}
+            onShowAccount={handleShowAccount}
+            onSignOut={handleSignOut}
           />
         )}
         
@@ -800,6 +814,13 @@ export default function Home() {
         <Help onBack={() => setCurrentView('daily')} />
       )}
 
+      {currentView === 'account' && user && (
+        <MyAccount 
+          user={user} 
+          onBack={() => setCurrentView('daily')} 
+        />
+      )}
+
       </div>
 
       {/* Undo Notification */}
@@ -809,6 +830,9 @@ export default function Home() {
         onDismiss={handleDismissUndo}
         duration={10000} // 10 seconds for multi-task undo
       />
+
+      {/* PWA Install Prompt */}
+      <PWAInstall />
     </div>
   );
 }

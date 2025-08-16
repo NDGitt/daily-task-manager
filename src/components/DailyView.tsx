@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calendar, FolderOpen, Settings, AlertCircle, Menu, X, ArrowLeft, HelpCircle } from 'lucide-react';
+import { Calendar, FolderOpen, Settings, AlertCircle, Menu, X, ArrowLeft, HelpCircle, User, LogOut } from 'lucide-react';
 import { TaskList } from './TaskList';
 import { ManualCarryOver } from './ManualCarryOver';
 import { getTodayString } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 import type { Task, UserSettings } from '@/types';
 
 interface DailyViewProps {
@@ -17,6 +18,8 @@ interface DailyViewProps {
   onShowSettings: () => void;
   onShowPreviousDays: () => void;
   onShowHelp: () => void;
+  onShowAccount: () => void;
+  onSignOut: () => void;
 }
 
 export function DailyView({
@@ -28,7 +31,9 @@ export function DailyView({
   onShowProjects,
   onShowSettings,
   onShowPreviousDays,
-  onShowHelp
+  onShowHelp,
+  onShowAccount,
+  onSignOut
 }: DailyViewProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
@@ -47,6 +52,16 @@ export function DailyView({
     const updatedTasks = [...tasks, ...carriedTasks];
     onTasksChange(updatedTasks);
     setIsSidebarOpen(false); // Close sidebar after carry over
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      onSignOut();
+      setIsSidebarOpen(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -132,6 +147,30 @@ export function DailyView({
               >
                 <HelpCircle size={20} />
                 <span>Help</span>
+              </button>
+            </div>
+
+            {/* Account Management */}
+            <div className="space-y-2 border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Account</h3>
+              
+              <button
+                onClick={() => {
+                  onShowAccount();
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <User size={20} />
+                <span>My Account</span>
+              </button>
+
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 p-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <LogOut size={20} />
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
