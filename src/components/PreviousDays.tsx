@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, CheckCircle, Circle, TrendingUp } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { getTodayString } from '@/lib/utils';
+import { getTodayString, dateToDateString } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface PreviousDaysProps {
@@ -31,10 +31,7 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
     loadMonthlySummaries();
   }, [currentMonth, userId]);
 
-  // Helper function to convert Date to date string
-  const dateToDateString = (date: Date): string => {
-    return date.toISOString().split('T')[0];
-  };
+  // Use the imported utility function for timezone-aware date conversion
 
   const loadMonthlySummaries = useCallback(async () => {
     setLoading(true);

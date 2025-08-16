@@ -175,6 +175,31 @@ export class DatabaseService {
     
     console.log(`Carrying over tasks from ${yesterday} to ${today}`);
 
+    // Check if carry-over has already been done today
+    const { data: existingTodayTasks } = await supabase
+      .from('tasks')
+      .select('date_created')
+      .eq('user_id', userId)
+      .eq('date_created', today)
+      .limit(1);
+
+    // If there are already tasks for today, check if any have carry_over_count > 0
+    // This indicates carry-over has already been done
+    if (existingTodayTasks && existingTodayTasks.length > 0) {
+      const { data: carriedTasks } = await supabase
+        .from('tasks')
+        .select('carry_over_count')
+        .eq('user_id', userId)
+        .eq('date_created', today)
+        .gt('carry_over_count', 0)
+        .limit(1);
+
+      if (carriedTasks && carriedTasks.length > 0) {
+        console.log('Carry-over already completed today, skipping');
+        return { carriedTasks: [], totalCarried: 0, highPriorityTasks: [], archivedTasks: 0 };
+      }
+    }
+
     // Get incomplete tasks from yesterday only
     const { data: incompleteTasks, error: fetchError } = await supabase
       .from('tasks')
@@ -313,7 +338,10 @@ export class DatabaseService {
     for (let i = 1; i <= daysBack; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      dates.push(date.toISOString().split('T')[0]);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      dates.push(`${year}-${month}-${day}`);
     }
 
     const { data: incompleteTasks, error } = await supabase
@@ -466,7 +494,7 @@ export class DatabaseService {
     const newProject = {
       user_id: userId,
       title,
-      date_created: new Date().toISOString().split('T')[0],
+      date_created: getTodayString(),
       last_accessed: new Date().toISOString(),
       archived: false
     };

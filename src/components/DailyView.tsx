@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calendar, FolderOpen, Settings, AlertCircle, Menu, X, ArrowLeft } from 'lucide-react';
+import { Calendar, FolderOpen, Settings, AlertCircle, Menu, X, ArrowLeft, HelpCircle } from 'lucide-react';
 import { TaskList } from './TaskList';
 import { ManualCarryOver } from './ManualCarryOver';
 import { getTodayString } from '@/lib/utils';
@@ -16,6 +16,7 @@ interface DailyViewProps {
   onShowProjects: () => void;
   onShowSettings: () => void;
   onShowPreviousDays: () => void;
+  onShowHelp: () => void;
 }
 
 export function DailyView({
@@ -26,7 +27,8 @@ export function DailyView({
   userId,
   onShowProjects,
   onShowSettings,
-  onShowPreviousDays
+  onShowPreviousDays,
+  onShowHelp
 }: DailyViewProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
@@ -119,6 +121,17 @@ export function DailyView({
               >
                 <Settings size={20} />
                 <span>Settings</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onShowHelp();
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <HelpCircle size={20} />
+                <span>Help</span>
               </button>
             </div>
           </div>

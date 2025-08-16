@@ -10,7 +10,8 @@ import { ArchivedTasks } from '@/components/ArchivedTasks';
 import { Auth } from '@/components/Auth';
 import { Onboarding } from '@/components/Onboarding';
 import { CarryOverNotification } from '@/components/CarryOverNotification';
-import { UndoNotification } from '@/components/UndoNotification';
+import { MultiTaskUndoNotification } from '@/components/MultiTaskUndoNotification';
+import { Help } from '@/components/Help';
 import { useAuth } from '@/hooks/useAuth';
 import { DatabaseService } from '@/lib/database';
 import { getTodayString } from '@/lib/utils';
@@ -37,7 +38,7 @@ export default function Home() {
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [projectTasks, setProjectTasks] = useState<Task[]>([]);
   const [userSettings, setUserSettings] = useState<UserSettings>(defaultSettings);
-  const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived'>('daily');
+  const [currentView, setCurrentView] = useState<'daily' | 'projects' | 'project' | 'settings' | 'previous' | 'archived' | 'help'>('daily');
   // const [appLoading, setAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,9 +50,14 @@ export default function Home() {
     archivedTasks: number;
   } | null>(null);
 
-  // Undo functionality
-  const [deletedTask, setDeletedTask] = useState<Task | null>(null);
-  const [deletedTaskIndex, setDeletedTaskIndex] = useState<number>(-1);
+  // Undo functionality - Multi-task support
+  interface DeletedTaskInfo {
+    task: Task;
+    originalIndex: number;
+    deletedAt: number;
+  }
+  
+  const [deletedTasks, setDeletedTasks] = useState<DeletedTaskInfo[]>([]);
   const [showCarryOverNotification, setShowCarryOverNotification] = useState(false);
 
   // Onboarding state
@@ -64,6 +70,13 @@ export default function Home() {
     
     // setAppLoading(true);
     setError(null);
+    
+    // Clear carry-over tracking if it's a new day
+    const today = getTodayString();
+    const lastCarryOverDate = localStorage.getItem(`carryOver_${user.id}`);
+    if (lastCarryOverDate && lastCarryOverDate !== today) {
+      localStorage.removeItem(`carryOver_${user.id}`);
+    }
     
     try {
       // Ensure user profile exists
@@ -115,12 +128,32 @@ export default function Home() {
           .catch(console.error);
       }, 2000);
       
-      // Check for carry-over tasks (in background)
+      // TEMPORARILY DISABLED: Check for carry-over tasks (in background)
+      // This is disabled to prevent timezone-related issues until fully resolved
       setTimeout(() => {
+        console.log('Automatic carry-over is temporarily disabled to prevent timezone issues');
+        
+        // Clean up any incorrect localStorage entries
+        const today = getTodayString();
+        const lastCarryOverDate = localStorage.getItem(`carryOver_${user.id}`);
+        
+        console.log(`Current local date: ${today}`);
+        console.log(`Last carry-over date in localStorage: ${lastCarryOverDate}`);
+        
+        // Remove any carry-over tracking for future dates (indicating timezone issues)
+        if (lastCarryOverDate && lastCarryOverDate > today) {
+          console.log('Removing incorrect future carry-over date from localStorage');
+          localStorage.removeItem(`carryOver_${user.id}`);
+        }
+        
+        // TODO: Re-enable automatic carry-over once timezone issues are fully resolved
+        /*
         DatabaseService.carryOverIncompleteTasks(user.id)
           .then(result => {
             if (result.totalCarried > 0) {
               console.log(`Carried over ${result.totalCarried} tasks from yesterday, archived ${result.archivedTasks} older tasks`);
+              localStorage.setItem(`carryOver_${user.id}`, today);
+              
               setCarryOverResult({
                 carriedTasks: result.carriedTasks,
                 highPriorityTasks: result.highPriorityTasks,
@@ -128,14 +161,14 @@ export default function Home() {
               });
               setShowCarryOverNotification(true);
               
-              // Reload tasks to include carried over ones
               return DatabaseService.getTasks(user.id);
             }
             return todayTasks;
           })
           .then(updatedTasks => setTasks(updatedTasks))
           .catch(console.error);
-      }, 1500); // Slightly longer delay to ensure UI is ready
+        */
+      }, 1500);
       
     } catch (err: unknown) {
       console.error('Error loading user data:', err);
@@ -288,72 +321,97 @@ export default function Home() {
     setShowArchivedProjects(false);
   };
 
+  const handleShowHelp = () => {
+    setCurrentView('help');
+  };
+
   const handleDeleteTask = (taskToDelete: Task) => {
     const taskIndex = tasks.findIndex(t => t.id === taskToDelete.id);
     if (taskIndex === -1) return;
 
+    // Clean up old deleted tasks (older than 10 seconds)
+    const now = Date.now();
+    setDeletedTasks(prev => prev.filter(task => now - task.deletedAt < 10000));
+
     // Store deleted task info for undo
-    setDeletedTask(taskToDelete);
-    setDeletedTaskIndex(taskIndex);
+    setDeletedTasks(prev => [...prev, { task: taskToDelete, originalIndex: taskIndex, deletedAt: now }]);
 
     // Remove task from UI immediately
     const newTasks = tasks.filter(t => t.id !== taskToDelete.id);
     setTasks(newTasks);
 
-    // Update database (will be handled by handleTasksChange)
-    handleTasksChange(newTasks);
+    // Delete from database directly instead of going through handleTasksChange
+    // This prevents conflicts with the undo system and multiple deletions
+    if (user?.id) {
+      DatabaseService.deleteTask(taskToDelete.id).catch(error => {
+        console.error('Error deleting task:', error);
+        // If deletion fails, revert the UI change
+        setTasks(tasks);
+      });
+    }
   };
 
   const handleUndoDelete = async () => {
-    if (!deletedTask || deletedTaskIndex === -1) return;
+    const now = Date.now();
+    const tasksToUndo = deletedTasks.filter(task => now - task.deletedAt < 10000); // Undo within 10 seconds
 
-    try {
-      // Recreate the task in the database with original properties
-      const restoredTask = await DatabaseService.createTask(user?.id || '', deletedTask.content);
-      
-      // Update the restored task to match the original task's state
-      let finalTask = restoredTask;
-      
-      if (deletedTask.completed !== restoredTask.completed || 
-          deletedTask.date_completed !== restoredTask.date_completed ||
-          deletedTask.eisenhower_quadrant !== restoredTask.eisenhower_quadrant) {
-        
-        const updatedTask = await DatabaseService.updateTask(restoredTask.id, {
-          completed: deletedTask.completed,
-          date_completed: deletedTask.date_completed,
-          eisenhower_quadrant: deletedTask.eisenhower_quadrant
-        });
-        
-        if (updatedTask) {
-          // Use the updated task instead of the basic restored task
-          finalTask = updatedTask;
-        }
-      }
-      
-      // Insert the task back at its original position
-      const newTasks = [...tasks];
-      newTasks.splice(deletedTaskIndex, 0, finalTask);
-      setTasks(newTasks);
-
-      // Update order in database
-      if (user?.id) {
-        await DatabaseService.reorderTasks(user.id, newTasks.map((t: Task) => t.id));
-      }
-
-      console.log('Task restored successfully');
-    } catch (error) {
-      console.error('Error restoring task:', error);
-      alert('Failed to restore task. Please try again.');
+    if (tasksToUndo.length === 0) {
+      alert('No tasks to undo recently.');
+      return;
     }
 
-    // Clear undo state
-    setDeletedTask(null);
-    setDeletedTaskIndex(-1);
+    try {
+      // Sort tasks by original index to restore them in the correct order
+      const sortedTasksToUndo = tasksToUndo.sort((a, b) => a.originalIndex - b.originalIndex);
+      
+      for (const taskInfo of sortedTasksToUndo) {
+        const restoredTask = await DatabaseService.createTask(user?.id || '', taskInfo.task.content);
+        
+        // Update the restored task to match the original task's state
+        let finalTask = restoredTask;
+        
+        if (taskInfo.task.completed !== restoredTask.completed || 
+            taskInfo.task.date_completed !== restoredTask.date_completed ||
+            taskInfo.task.eisenhower_quadrant !== restoredTask.eisenhower_quadrant) {
+          
+          const updatedTask = await DatabaseService.updateTask(restoredTask.id, {
+            completed: taskInfo.task.completed,
+            date_completed: taskInfo.task.date_completed,
+            eisenhower_quadrant: taskInfo.task.eisenhower_quadrant
+          });
+          
+          if (updatedTask) {
+            // Use the updated task instead of the basic restored task
+            finalTask = updatedTask;
+          }
+        }
+        
+        // Insert the task back at its original position
+        setTasks(prevTasks => {
+          const newTasks = [...prevTasks];
+          newTasks.splice(taskInfo.originalIndex, 0, finalTask);
+          return newTasks;
+        });
+      }
+      
+      // Update order in database for all restored tasks
+      if (user?.id) {
+        const updatedTasks = tasks.concat(sortedTasksToUndo.map(taskInfo => taskInfo.task));
+        await DatabaseService.reorderTasks(user.id, updatedTasks.map((t: Task) => t.id));
+      }
+      
+      // Remove undone tasks from the deleted tasks list
+      setDeletedTasks(prev => prev.filter(task => !tasksToUndo.includes(task)));
+      
+      console.log(`${sortedTasksToUndo.length} tasks restored successfully`);
+    } catch (error) {
+      console.error('Error restoring tasks:', error);
+      alert('Failed to restore tasks. Please try again.');
+    }
   };
 
   const handleDismissUndo = () => {
-    setDeletedTask(null);
-    setDeletedTaskIndex(-1);
+    setDeletedTasks([]);
   };
 
   const handleOnboardingComplete = async () => {
@@ -361,13 +419,16 @@ export default function Home() {
       try {
         await DatabaseService.completeOnboarding(user.id);
         setShowOnboarding(false);
+        setOnboardingChecked(true);
       } catch (error) {
         console.error('Failed to complete onboarding:', error);
         // Still hide onboarding even if database update fails
         setShowOnboarding(false);
+        setOnboardingChecked(true);
       }
     } else {
       setShowOnboarding(false);
+      setOnboardingChecked(true);
     }
   };
 
@@ -681,6 +742,7 @@ export default function Home() {
             onShowProjects={handleShowProjects}
             onShowSettings={handleShowSettings}
             onShowPreviousDays={handleShowPreviousDays}
+            onShowHelp={handleShowHelp}
           />
         )}
         
@@ -734,17 +796,18 @@ export default function Home() {
         />
       )}
 
-
-
+      {currentView === 'help' && (
+        <Help onBack={() => setCurrentView('daily')} />
+      )}
 
       </div>
 
       {/* Undo Notification */}
-      <UndoNotification
-        deletedTask={deletedTask}
+      <MultiTaskUndoNotification
+        deletedTasks={deletedTasks}
         onUndo={handleUndoDelete}
         onDismiss={handleDismissUndo}
-        duration={5000} // 5 seconds
+        duration={10000} // 10 seconds for multi-task undo
       />
     </div>
   );

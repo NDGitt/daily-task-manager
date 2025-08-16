@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Archive, Search, Filter, CheckCircle, Circle, RotateCcw, Trash2, Calendar } from 'lucide-react';
 import { DatabaseService } from '@/lib/database';
-import { getTodayString, getYesterdayString } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface ArchivedTasksProps {
@@ -34,7 +34,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
     }
   }, [selectedDate, archivedTasks, searchQuery, filterType]);
 
-  const loadArchivedTasks = useCallback(async () => {
+  const loadArchivedTasks = async () => {
     setLoading(true);
     try {
       const tasks = await DatabaseService.getArchivedTasks(userId, 200); // Load more for better browsing
@@ -44,9 +44,9 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  };
 
-  const applyFiltersToDateTasks = useCallback((dateTasks: Task[]) => {
+  const applyFiltersToDateTasks = (dateTasks: Task[]) => {
     let filtered = [...dateTasks];
 
     // Apply completion filter
@@ -65,7 +65,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
     }
 
     setSelectedDateTasks(filtered);
-  }, [filterType, searchQuery]);
+  };
 
   const handleTaskSelect = (taskId: string) => {
     const newSelected = new Set(selectedTasks);
@@ -102,7 +102,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
       // Update task to be unarchived and move to today
       await DatabaseService.updateTask(taskId, {
         archived: false,
-        date_created: getTodayString() // Move to today
+        date_created: formatDate(new Date()) // Move to today
       });
       
       // Remove from local state
@@ -122,7 +122,7 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
       const promises = Array.from(selectedTasks).map(taskId => 
         DatabaseService.updateTask(taskId, {
           archived: false,
-          date_created: getTodayString()
+          date_created: formatDate(new Date())
         })
       );
       
@@ -188,10 +188,13 @@ export function ArchivedTasks({ userId, onBack }: ArchivedTasksProps) {
 
   const getDateLabel = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    if (dateStr === getTodayString()) {
+    if (dateStr === formatDate(today)) {
       return 'Today';
-    } else if (dateStr === getYesterdayString()) {
+    } else if (dateStr === formatDate(yesterday)) {
       return 'Yesterday';
     } else {
       return date.toLocaleDateString('en-US', { 

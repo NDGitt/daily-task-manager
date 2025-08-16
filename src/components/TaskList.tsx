@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Plus } from 'lucide-react';
 import { TaskItem } from './TaskItem';
-import { cn, reorderTasks } from '@/lib/utils';
+import { cn, reorderTasks, getTodayString } from '@/lib/utils';
 import type { Task, TaskListProps } from '@/types';
 
 export function TaskList({ 
@@ -23,7 +23,7 @@ export function TaskList({
         id: crypto.randomUUID(),
         user_id: '', // Will be set by parent component
         content: newTaskContent.trim(),
-        date_created: new Date().toISOString().split('T')[0],
+        date_created: getTodayString(),
         order: tasks.length,
         completed: false,
         archived: false,

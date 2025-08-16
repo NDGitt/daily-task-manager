@@ -1,27 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Undo2, X } from 'lucide-react';
+import { Undo2, X, Trash2 } from 'lucide-react';
 import type { Task } from '@/types';
 
-interface UndoNotificationProps {
-  deletedTask: Task | null;
+interface DeletedTaskInfo {
+  task: Task;
+  originalIndex: number;
+  deletedAt: number;
+}
+
+interface MultiTaskUndoNotificationProps {
+  deletedTasks: DeletedTaskInfo[];
   onUndo: () => void;
   onDismiss: () => void;
   duration?: number; // Duration in milliseconds
 }
 
-export function UndoNotification({ 
-  deletedTask, 
+export function MultiTaskUndoNotification({ 
+  deletedTasks, 
   onUndo, 
   onDismiss, 
-  duration = 5000 
-}: UndoNotificationProps) {
+  duration = 10000 // 10 seconds for multi-task undo
+}: MultiTaskUndoNotificationProps) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (deletedTask) {
+    if (deletedTasks.length > 0) {
       setIsVisible(true);
       setTimeLeft(duration);
 
@@ -41,11 +47,12 @@ export function UndoNotification({
     } else {
       setIsVisible(false);
     }
-  }, [deletedTask, duration, onDismiss]);
+  }, [deletedTasks, duration, onDismiss]);
 
-  if (!deletedTask) return null;
+  if (deletedTasks.length === 0) return null;
 
   const progressPercentage = (timeLeft / duration) * 100;
+  const taskCount = deletedTasks.length;
 
   return (
     <div
@@ -65,12 +72,26 @@ export function UndoNotification({
         <div className="p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white mb-1">
-                Task deleted
-              </p>
-              <p className="text-sm text-gray-300 truncate">
-                &quot;{deletedTask.content}&quot;
-              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <Trash2 size={16} className="text-red-400" />
+                <p className="text-sm font-medium text-white">
+                  {taskCount} task{taskCount > 1 ? 's' : ''} deleted
+                </p>
+              </div>
+              
+              {/* Show task previews */}
+              <div className="space-y-1 max-h-20 overflow-y-auto">
+                {deletedTasks.slice(0, 3).map((deletedTaskInfo, index) => (
+                  <p key={deletedTaskInfo.task.id} className="text-sm text-gray-300 truncate">
+                    • &quot;{deletedTaskInfo.task.content}&quot;
+                  </p>
+                ))}
+                {taskCount > 3 && (
+                  <p className="text-sm text-gray-400">
+                    ...and {taskCount - 3} more
+                  </p>
+                )}
+              </div>
             </div>
             
             <div className="flex items-center gap-2">
@@ -79,7 +100,7 @@ export function UndoNotification({
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
               >
                 <Undo2 size={14} />
-                Undo
+                Undo All
               </button>
               
               <button
@@ -98,4 +119,3 @@ export function UndoNotification({
     </div>
   );
 }
-
