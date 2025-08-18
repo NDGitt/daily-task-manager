@@ -77,3 +77,5 @@ If the install prompt doesn't appear:
 2. Check that the manifest.json is accessible
 3. Verify the service worker is registered
 4. Try clearing browser cache and reloading
+
+

@@ -82,3 +82,4 @@ export function PWAInstall() {
     </div>
   );
 }
+

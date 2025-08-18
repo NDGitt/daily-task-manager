@@ -224,13 +224,67 @@ export default function Home() {
     const newTaskIds = new Set(newTasks.map(t => t.id));
     
     try {
+      // Collect all operations to perform in parallel
+      const newTasksToCreate = [];
+      const tasksToUpdate = [];
+      const tasksToDelete = [];
+      const hiddenCompletedTasks = [];
+
       // Handle new tasks
       for (const task of newTasks) {
         if (!currentTaskIds.has(task.id)) {
-          // New task - create in database
-          console.log('Creating new task for user:', user.id);
-          console.log('Task content:', task.content);
-          
+          // New task - collect for batch creation
+          newTasksToCreate.push(task);
+        } else {
+          // Existing task - check for updates
+          const oldTask = tasks.find(t => t.id === task.id);
+          if (oldTask && (
+            oldTask.content !== task.content ||
+            oldTask.completed !== task.completed ||
+            oldTask.order !== task.order
+          )) {
+            tasksToUpdate.push({
+              taskId: task.id,
+              updates: {
+                content: task.content,
+                completed: task.completed,
+                order: task.order,
+                date_completed: task.completed ? new Date().toISOString() : null
+              }
+            });
+          }
+        }
+      }
+      
+      // Handle tasks that are missing from newTasks
+      for (const oldTask of tasks) {
+        if (!newTaskIds.has(oldTask.id)) {
+          // If we're using hide behavior and this task was incomplete, it was likely just completed and hidden
+          if (userSettings?.task_completion_behavior === 'hide' && !oldTask.completed) {
+            // Task was just completed and hidden, update it in database
+            console.log('Task was completed and hidden, updating in database:', oldTask.id);
+            hiddenCompletedTasks.push({
+              taskId: oldTask.id,
+              updates: {
+                completed: true,
+                date_completed: new Date().toISOString()
+              }
+            });
+          } else {
+            // This was an actually deleted task (user used delete button)
+            console.log('Task was actually deleted, removing from database:', oldTask.id);
+            tasksToDelete.push(oldTask.id);
+          }
+        }
+      }
+
+      // Execute all operations in parallel
+      const operations = [];
+
+      // Handle new task creation (still sequential as they need individual handling)
+      if (newTasksToCreate.length > 0) {
+        console.log(`Creating ${newTasksToCreate.length} new tasks...`);
+        for (const task of newTasksToCreate) {
           try {
             const createdTask = await DatabaseService.createTask(user.id, task.content);
             console.log('Task created successfully:', createdTask);
@@ -241,57 +295,48 @@ export default function Home() {
             );
           } catch (error) {
             console.error('Failed to create task:', error);
-            // Revert the optimistic update
-            setTasks(tasks); // Reset to previous state
+            // Revert the optimistic update using functional update
+            setTasks(prevTasks => tasks); // More explicit about using closure state
             alert('Failed to save task. Please try again.');
             return;
           }
-        } else {
-          // Existing task - check for updates
-          const oldTask = tasks.find(t => t.id === task.id);
-          if (oldTask && (
-            oldTask.content !== task.content ||
-            oldTask.completed !== task.completed ||
-            oldTask.order !== task.order
-          )) {
-            const updatedTask = await DatabaseService.updateTask(task.id, {
-              content: task.content,
-              completed: task.completed,
-              order: task.order,
-              date_completed: task.completed ? new Date().toISOString() : null
-            });
-            
-            if (!updatedTask) {
-              // Task doesn't exist in database, might be a locally created task that failed to save
-              console.warn(`Task ${task.id} not found in database, might need to recreate`);
-            }
-          }
         }
       }
-      
-      // Handle tasks that are missing from newTasks
-      // This could be either deleted tasks or tasks hidden due to completion behavior
-      for (const oldTask of tasks) {
-        if (!newTaskIds.has(oldTask.id)) {
-          // If we're using hide behavior and this task was incomplete, it was likely just completed and hidden
-          if (userSettings?.task_completion_behavior === 'hide' && !oldTask.completed) {
-            // Task was just completed and hidden, update it in database
-            console.log('Task was completed and hidden, updating in database:', oldTask.id);
-            await DatabaseService.updateTask(oldTask.id, {
-              completed: true,
-              date_completed: new Date().toISOString()
-            });
-          } else {
-            // This was an actually deleted task (user used delete button)
-            console.log('Task was actually deleted, removing from database:', oldTask.id);
-            await DatabaseService.deleteTask(oldTask.id);
-          }
-        }
+
+      // Add parallel operations
+      if (tasksToUpdate.length > 0) {
+        console.log(`Batch updating ${tasksToUpdate.length} tasks in parallel...`);
+        operations.push(DatabaseService.updateTasksBatch(tasksToUpdate));
       }
-      
-      // Handle reordering
+
+      if (hiddenCompletedTasks.length > 0) {
+        console.log(`Batch updating ${hiddenCompletedTasks.length} hidden completed tasks in parallel...`);
+        operations.push(DatabaseService.updateTasksBatch(hiddenCompletedTasks));
+      }
+
+      if (tasksToDelete.length > 0) {
+        console.log(`Batch deleting ${tasksToDelete.length} tasks in parallel...`);
+        operations.push(DatabaseService.deleteTasksBatch(tasksToDelete));
+      }
+
+      // Handle reordering - only if order actually changed
       if (newTasks.length > 0) {
-        await DatabaseService.reorderTasks(user.id, newTasks.map(t => t.id));
+        const currentOrder = tasks.map(t => t.id);
+        const newOrder = newTasks.map(t => t.id);
+        const orderChanged = JSON.stringify(currentOrder) !== JSON.stringify(newOrder);
+        
+        if (orderChanged) {
+          console.log(`Reordering ${newTasks.length} tasks in parallel (order changed)...`);
+          operations.push(DatabaseService.reorderTasks(user.id, newOrder));
+        } else {
+          console.log('Task order unchanged, skipping reordering operation');
+        }
+      }
+
+      // Execute all parallel operations
+      if (operations.length > 0) {
+        await Promise.all(operations);
+        console.log('All parallel database operations completed successfully');
       }
       
       // Update local state
@@ -301,8 +346,8 @@ export default function Home() {
       console.error('Error updating tasks:', err);
       setError(err instanceof Error ? err.message : 'Failed to update tasks');
       
-      // Fallback to localStorage
-      setTasks(newTasks);
+      // Fallback to localStorage using functional update for clarity
+      setTasks(prevTasks => newTasks);
       localStorage.setItem('daily-tasks', JSON.stringify(newTasks));
     }
   };

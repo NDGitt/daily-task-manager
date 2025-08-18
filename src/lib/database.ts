@@ -132,33 +132,75 @@ export class DatabaseService {
   }
 
   static async reorderTasks(userId: string, taskIds: string[]): Promise<void> {
-    console.log('=== Reordering tasks ===');
+    console.log('=== Reordering tasks (parallel) ===');
     console.log('userId:', userId);
     console.log('taskIds:', taskIds);
     
-    // Update each task's order individually to avoid upsert issues
-    for (let i = 0; i < taskIds.length; i++) {
-      const taskId = taskIds[i];
-      const newOrder = i;
-      
-      const { data, error } = await supabase
+    // Update all tasks in parallel for better performance
+    const updatePromises = taskIds.map((taskId, index) => 
+      supabase
         .from('tasks')
-        .update({ order: newOrder })
+        .update({ order: index })
         .eq('id', taskId)
-        .eq('user_id', userId) // Ensure we only update tasks belonging to this user
-        .select();
+        .eq('user_id', userId)
+        .select()
+    );
+
+    try {
+      const results = await Promise.all(updatePromises);
       
-      if (error) {
-        console.error(`Failed to update order for task ${taskId}:`, error);
-        throw error;
-      }
+      // Check for errors in any of the results
+      results.forEach((result, index) => {
+        if (result.error) {
+          console.error(`Failed to update order for task ${taskIds[index]}:`, result.error);
+          throw result.error;
+        }
+        
+        if (result.data && result.data.length === 0) {
+          console.warn(`Task ${taskIds[index]} not found in database during reordering`);
+        }
+      });
       
-      if (data && data.length === 0) {
-        console.warn(`Task ${taskId} not found in database during reordering`);
-      }
+      console.log('Task reordering completed successfully (parallel)');
+    } catch (error) {
+      console.error('Error in parallel reordering:', error);
+      throw error;
     }
+  }
+
+  // Batch update multiple tasks in parallel
+  static async updateTasksBatch(updates: Array<{ taskId: string; updates: Partial<Task> }>): Promise<(Task | null)[]> {
+    console.log('=== Batch updating tasks (parallel) ===');
+    console.log('Number of tasks to update:', updates.length);
     
-    console.log('Task reordering completed successfully');
+    const updatePromises = updates.map(({ taskId, updates: taskUpdates }) =>
+      this.updateTask(taskId, taskUpdates)
+    );
+
+    try {
+      const results = await Promise.all(updatePromises);
+      console.log('Batch task updates completed successfully');
+      return results;
+    } catch (error) {
+      console.error('Error in batch task updates:', error);
+      throw error;
+    }
+  }
+
+  // Batch delete multiple tasks in parallel
+  static async deleteTasksBatch(taskIds: string[]): Promise<void> {
+    console.log('=== Batch deleting tasks (parallel) ===');
+    console.log('Number of tasks to delete:', taskIds.length);
+    
+    const deletePromises = taskIds.map(taskId => this.deleteTask(taskId));
+
+    try {
+      await Promise.all(deletePromises);
+      console.log('Batch task deletions completed successfully');
+    } catch (error) {
+      console.error('Error in batch task deletions:', error);
+      throw error;
+    }
   }
 
   // Simple carry-over logic - only from yesterday, archive older tasks
