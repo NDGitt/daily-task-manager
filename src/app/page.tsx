@@ -7,7 +7,7 @@ import { ProjectView } from '@/components/ProjectView';
 import { Settings } from '@/components/Settings';
 import { PreviousDays } from '@/components/PreviousDays';
 import { ArchivedTasks } from '@/components/ArchivedTasks';
-import { Auth } from '@/components/Auth';
+import { LandingPage } from '@/components/LandingPage';
 import { Onboarding } from '@/components/Onboarding';
 import { CarryOverNotification } from '@/components/CarryOverNotification';
 import { MultiTaskUndoNotification } from '@/components/MultiTaskUndoNotification';
@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { DatabaseService } from '@/lib/database';
 import { getTodayString } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
 import type { Task, Project, UserSettings } from '@/types';
 
@@ -738,6 +739,13 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
+          <Image 
+            src="/my-diary-icon-2.png" 
+            alt="My Diary App Icon" 
+            width={64} 
+            height={64} 
+            className="rounded-3xl shadow-xl mb-4"
+          />
           <div className="text-2xl font-bold text-gray-900 mb-2">My Diary</div>
           <div className="text-gray-600">Loading...</div>
         </div>
@@ -745,9 +753,9 @@ export default function Home() {
     );
   }
 
-  // Show auth screen if not authenticated
+  // Show landing page if not authenticated
   if (!isAuthenticated) {
-    return <Auth onAuthSuccess={loadUserData} />;
+    return <LandingPage onAuthSuccess={loadUserData} />;
   }
 
   // Show error state
