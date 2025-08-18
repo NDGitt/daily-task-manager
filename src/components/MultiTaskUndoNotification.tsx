@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Undo2, X, Trash2 } from 'lucide-react';
+import { Undo2 } from 'lucide-react';
 import type { Task } from '@/types';
 
 interface DeletedTaskInfo {
@@ -56,66 +56,26 @@ export function MultiTaskUndoNotification({
 
   return (
     <div
-      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-50 transform transition-all duration-300 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+      className={`fixed bottom-6 right-6 z-50 transform transition-all duration-300 ${
+        isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-4 opacity-0 scale-95'
       }`}
     >
-      <div className="bg-gray-900 text-white rounded-lg shadow-lg border border-gray-700 overflow-hidden">
-        {/* Progress bar */}
-        <div className="h-1 bg-gray-700">
-          <div 
-            className="h-full bg-blue-500 transition-all duration-100 ease-linear"
-            style={{ width: `${progressPercentage}%` }}
-          />
-        </div>
+      <button
+        onClick={onUndo}
+        className="relative group bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3 shadow-xl border border-gray-700 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 touch-manipulation"
+        style={{ opacity: progressPercentage / 100 }}
+        title={`Undo ${taskCount} deleted task${taskCount > 1 ? 's' : ''}`}
+      >
+        {/* Undo icon */}
+        <Undo2 size={18} className="opacity-80" />
         
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <Trash2 size={16} className="text-red-400" />
-                <p className="text-sm font-medium text-white">
-                  {taskCount} task{taskCount > 1 ? 's' : ''} deleted
-                </p>
-              </div>
-              
-              {/* Show task previews */}
-              <div className="space-y-1 max-h-20 overflow-y-auto">
-                {deletedTasks.slice(0, 3).map((deletedTaskInfo, index) => (
-                  <p key={deletedTaskInfo.task.id} className="text-sm text-gray-300 truncate">
-                    • &quot;{deletedTaskInfo.task.content}&quot;
-                  </p>
-                ))}
-                {taskCount > 3 && (
-                  <p className="text-sm text-gray-400">
-                    ...and {taskCount - 3} more
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onUndo}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
-              >
-                <Undo2 size={14} />
-                Undo All
-              </button>
-              
-              <button
-                onClick={() => {
-                  setIsVisible(false);
-                  setTimeout(onDismiss, 300);
-                }}
-                className="p-1.5 text-gray-400 hover:text-white transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
+        {/* Task count badge */}
+        {taskCount > 1 && (
+          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            {taskCount > 9 ? '9+' : taskCount}
           </div>
-        </div>
-      </div>
+        )}
+      </button>
     </div>
   );
 }
