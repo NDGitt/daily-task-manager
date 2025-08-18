@@ -79,3 +79,4 @@ If the install prompt doesn't appear:
 4. Try clearing browser cache and reloading
 
 
+
