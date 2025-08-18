@@ -150,7 +150,7 @@ export default function Home() {
         }
         
         // TODO: Re-enable automatic carry-over once timezone issues are fully resolved
-        /*
+        //Re-Enabled carry-over
         DatabaseService.carryOverIncompleteTasks(user.id)
           .then(result => {
             if (result.totalCarried > 0) {
@@ -170,7 +170,7 @@ export default function Home() {
           })
           .then(updatedTasks => setTasks(updatedTasks))
           .catch(console.error);
-        */
+        
       }, 1500);
       
     } catch (err: unknown) {
