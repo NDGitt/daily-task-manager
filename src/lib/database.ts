@@ -204,7 +204,8 @@ export class DatabaseService {
   }
 
   // Simple carry-over logic - only from yesterday, archive older tasks
-  static async carryOverIncompleteTasks(userId: string): Promise<{
+   // Simple carry-over logic - only from yesterday, archive older tasks
+   static async carryOverIncompleteTasks(userId: string): Promise<{
     carriedTasks: Task[];
     totalCarried: number;
     highPriorityTasks: Task[];
@@ -212,35 +213,17 @@ export class DatabaseService {
   }> {
     console.log('=== Starting simple task carry-over ===');
     
+    // Check if carry-over was already attempted today
+    const alreadyAttempted = await this.hasCarryOverBeenAttemptedToday(userId);
+    if (alreadyAttempted) {
+      console.log('Carry-over already attempted today, skipping');
+      return { carriedTasks: [], totalCarried: 0, highPriorityTasks: [], archivedTasks: 0 };
+    }
+
     const yesterday = getYesterdayString();
     const today = getTodayString();
     
     console.log(`Carrying over tasks from ${yesterday} to ${today}`);
-
-    // Check if carry-over has already been done today
-    const { data: existingTodayTasks } = await supabase
-      .from('tasks')
-      .select('date_created')
-      .eq('user_id', userId)
-      .eq('date_created', today)
-      .limit(1);
-
-    // If there are already tasks for today, check if any have carry_over_count > 0
-    // This indicates carry-over has already been done
-    if (existingTodayTasks && existingTodayTasks.length > 0) {
-      const { data: carriedTasks } = await supabase
-        .from('tasks')
-        .select('carry_over_count')
-        .eq('user_id', userId)
-        .eq('date_created', today)
-        .gt('carry_over_count', 0)
-        .limit(1);
-
-      if (carriedTasks && carriedTasks.length > 0) {
-        console.log('Carry-over already completed today, skipping');
-        return { carriedTasks: [], totalCarried: 0, highPriorityTasks: [], archivedTasks: 0 };
-      }
-    }
 
     // Get incomplete tasks from yesterday only
     const { data: incompleteTasks, error: fetchError } = await supabase
@@ -323,6 +306,11 @@ export class DatabaseService {
     const createdTasks = data || [];
     const highPriorityTasks = createdTasks.filter(task => task.carry_over_count >= 2);
 
+    // Record the carry-over attempt for cross-device tracking
+    if (createdTasks.length > 0) {
+      await this.recordCarryOverAttempt(userId);
+    }
+
     console.log(`Successfully carried over ${createdTasks.length} tasks from yesterday`);
     console.log(`${highPriorityTasks.length} tasks have been carried over multiple times`);
     console.log(`Archived ${archivedCount} older incomplete tasks`);
@@ -333,7 +321,7 @@ export class DatabaseService {
       highPriorityTasks,
       archivedTasks: archivedCount
     };
-  }
+  } 
 
   // Archive all tasks older than yesterday (both completed and incomplete)
   static async archiveOldTasks(userId: string): Promise<number> {
@@ -834,4 +822,62 @@ export class DatabaseService {
       throw error;
     }
   }
+  // Cross-device carry-over tracking methods
+  static async hasCarryOverBeenAttemptedToday(userId: string): Promise<boolean> {
+    const today = getTodayString();
+    
+    const { data, error } = await supabase
+      .from('carry_over_attempts')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('attempt_date', today)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      console.error('Error checking carry-over attempts:', error);
+      return false;
+    }
+
+    return !!data;
+  }
+
+  static async recordCarryOverAttempt(userId: string): Promise<void> {
+    const today = getTodayString();
+    
+    const { error } = await supabase
+      .from('carry_over_attempts')
+      .insert({
+        user_id: userId,
+        attempt_date: today
+      });
+
+    if (error) {
+      console.error('Error recording carry-over attempt:', error);
+    }
+  }
+
+  static async cleanupOldCarryOverAttempts(userId: string): Promise<void> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoStr = this.dateToDateString(thirtyDaysAgo);
+
+    const { error } = await supabase
+      .from('carry_over_attempts')
+      .delete()
+      .eq('user_id', userId)
+      .lt('attempt_date', thirtyDaysAgoStr);
+
+    if (error) {
+      console.error('Error cleaning up old carry-over attempts:', error);
+    }
+  }
+
+  // Helper method for date formatting
+  private static dateToDateString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
 }
