@@ -296,7 +296,7 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Smart Background Features</h3>
                 <p className="text-sm sm:text-base text-gray-600">
                   Intelligent task carry-over and automatic archiving work silently behind the scenes. 
-                  <span className="text-green-700 font-medium">AI-powered insights coming soon.</span>
+                  <span className="text-green-700 font-medium"><br/>AI-powered insights coming soon.</span>
                 </p>
               </div>
 
