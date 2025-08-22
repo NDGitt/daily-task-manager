@@ -200,8 +200,9 @@ export function DailyView({
         </div>
 
 
-
-      {/* Carry-over Warnings */}
+{/* commented out Carry-over Warnings */}
+{/* 
+      Carry-over Warnings
       {carryOverTasks.length > 0 && userSettings.smart_suggestions_enabled && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
@@ -227,7 +228,7 @@ export function DailyView({
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Progress Bar */}
       {tasks.length > 0 && (
