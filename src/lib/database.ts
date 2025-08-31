@@ -405,14 +405,20 @@ export class DatabaseService {
   }
 
   // Get tasks for a specific date
-  static async getTasksForDate(userId: string, date: string): Promise<Task[]> {
-    const { data, error } = await supabase
+  static async getTasksForDate(userId: string, date: string, includeArchived: boolean = false): Promise<Task[]> {
+    let query = supabase
       .from('tasks')
       .select('*')
       .eq('user_id', userId)
       .eq('date_created', date)
       .is('project_id', null) // Only daily tasks, not project tasks
       .order('"order"', { ascending: true });
+      
+    if (!includeArchived) {
+      query = query.eq('archived', false);
+    }
+    
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching tasks for date:', error);
@@ -435,7 +441,7 @@ export class DatabaseService {
       .eq('user_id', userId)
       .gte('date_created', startDate)
       .lte('date_created', endDate)
-      .eq('archived', false)
+      // .eq('archived', false)     -- removed this line to include archived tasks
       .is('project_id', null); // Only daily tasks
 
     if (error) {

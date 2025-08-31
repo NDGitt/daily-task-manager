@@ -54,7 +54,7 @@ export function PreviousDays({ userId, onBack }: PreviousDaysProps) {
   const loadTasksForDate = async (date: string) => {
     setTasksLoading(true);
     try {
-      const tasks = await DatabaseService.getTasksForDate(userId, date);
+      const tasks = await DatabaseService.getTasksForDate(userId, date, true); // includeArchived
       setSelectedDayTasks(tasks);
     } catch (error) {
       console.error('Error loading tasks for date:', error);
