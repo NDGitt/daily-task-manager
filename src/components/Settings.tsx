@@ -179,15 +179,21 @@ export function Settings({ settings, onSaveSettings, onBack, onShowPreviousDays,
               <div>
                 <label className="block text-sm sm:text-base font-medium text-gray-700  mb-3">
                   Task overload threshold
+                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Coming Soon
+                  </span>
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 opacity-50">
                   <input
                     type="range"
                     min="5"
                     max="25"
                     value={localSettings.task_overload_threshold}
-                    onChange={(e) => updateSetting('task_overload_threshold', parseInt(e.target.value))}
-                    className="flex-1 h-2 bg-gray-200  rounded-lg appearance-none cursor-pointer"
+                    disabled
+                    //onChange={(e) => updateSetting('task_overload_threshold', parseInt(e.target.value))}
+                   // className="flex-1 h-2 bg-gray-200  rounded-lg appearance-none cursor-pointer"
+                   className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-not-allowed"
+
                   />
                   <span className="text-sm sm:text-base font-medium text-gray-900  min-w-[2.5rem] sm:min-w-[3rem] text-center">
                     {localSettings.task_overload_threshold}
@@ -200,19 +206,27 @@ export function Settings({ settings, onSaveSettings, onBack, onShowPreviousDays,
 
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <label className="text-sm sm:text-base font-medium text-gray-700 ">Smart suggestions</label>
-                  <p className="text-xs sm:text-sm text-gray-600  mt-1">Get helpful task suggestions based on your patterns</p>
+                  <label className="text-sm sm:text-base font-medium text-gray-700 ">Smart suggestions
+                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Coming Soon
+                  </span>
+                  </label>
+                <p className="text-xs sm:text-sm text-gray-600  mt-1">Get helpful task suggestions based on your patterns</p>
                 </div>
                 <button
-                  onClick={() => updateSetting('smart_suggestions_enabled', !localSettings.smart_suggestions_enabled)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${
-                    localSettings.smart_suggestions_enabled ? 'bg-blue-600' : 'bg-gray-200 '
-                  }`}
+                  disabled
+                  //onClick={() => updateSetting('smart_suggestions_enabled', !localSettings.smart_suggestions_enabled)}
+              //    onClick={() => updateSetting('smart_suggestions_enabled', !localSettings.smart_suggestions_enabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 cursor-not-allowed opacity-50`}
                 >
-                  <span
+                 {/* <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                       localSettings.smart_suggestions_enabled ? 'translate-x-6' : 'translate-x-1'
                     }`}
+                  /> */}
+                  
+                  <span
+                    className= "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
                   />
                 </button>
               </div>
@@ -241,11 +255,12 @@ export function Settings({ settings, onSaveSettings, onBack, onShowPreviousDays,
                     localSettings.project_archive_completed ? 'bg-green-600' : 'bg-gray-200 '
                   }`}
                 >
-                  <span
+                 <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                       localSettings.project_archive_completed ? 'translate-x-6' : 'translate-x-1'
                     }`}
-                  />
+                  /> 
+                  
                 </button>
               </div>
 
