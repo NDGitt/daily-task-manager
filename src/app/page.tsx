@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DailyView } from '@/components/DailyView';
 import { ProjectList } from '@/components/ProjectList';
 import { ProjectView } from '@/components/ProjectView';
@@ -67,6 +67,9 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
 
+  // Prevent multiple carry-over attempts
+  const carryOverInProgress = useRef(false);
+
   // Define loadUserData before using it in useEffect
   const loadUserData = useCallback(async () => {
     if (!user) return;
@@ -131,10 +134,15 @@ export default function Home() {
           .catch(console.error);
       }, 2000);
       
-      // TEMPORARILY DISABLED: Check for carry-over tasks (in background)
-      // This is disabled to prevent timezone-related issues until fully resolved
-      setTimeout(() => {
-        console.log('Automatic carry-over is temporarily disabled to prevent timezone issues');
+      // Check for carry-over tasks (in background)
+      setTimeout(async () => {
+        // Prevent multiple simultaneous carry-over attempts
+        if (carryOverInProgress.current) {
+          console.log('Carry-over already in progress, skipping');
+          return;
+        }
+
+        console.log('Checking for carry-over tasks...');
         
         // Clean up any incorrect localStorage entries
         const today = getTodayString();
@@ -149,27 +157,36 @@ export default function Home() {
           localStorage.removeItem(`carryOver_${user.id}`);
         }
         
-        // TODO: Re-enable automatic carry-over once timezone issues are fully resolved
-        //Re-Enabled carry-over
-        DatabaseService.carryOverIncompleteTasks(user.id)
-          .then(result => {
-            if (result.totalCarried > 0) {
-              console.log(`Carried over ${result.totalCarried} tasks from yesterday, archived ${result.archivedTasks} older tasks`);
-              localStorage.setItem(`carryOver_${user.id}`, today);
-              
-              setCarryOverResult({
-                carriedTasks: result.carriedTasks,
-                highPriorityTasks: result.highPriorityTasks,
-                archivedTasks: result.archivedTasks
-              });
-              setShowCarryOverNotification(true);
-              
-              return DatabaseService.getTasks(user.id);
-            }
-            return todayTasks;
-          })
-          .then(updatedTasks => setTasks(updatedTasks))
-          .catch(console.error);
+        // Check if already attempted today
+        if (lastCarryOverDate === today) {
+          console.log('Carry-over already completed today, skipping');
+          return;
+        }
+
+        try {
+          carryOverInProgress.current = true;
+          
+          const result = await DatabaseService.carryOverIncompleteTasks(user.id);
+          
+          if (result.totalCarried > 0) {
+            console.log(`Carried over ${result.totalCarried} tasks from yesterday, archived ${result.archivedTasks} older tasks`);
+            localStorage.setItem(`carryOver_${user.id}`, today);
+            
+            setCarryOverResult({
+              carriedTasks: result.carriedTasks,
+              highPriorityTasks: result.highPriorityTasks,
+              archivedTasks: result.archivedTasks
+            });
+            setShowCarryOverNotification(true);
+            
+            const updatedTasks = await DatabaseService.getTasks(user.id);
+            setTasks(updatedTasks);
+          }
+        } catch (error) {
+          console.error('Error during carry-over:', error);
+        } finally {
+          carryOverInProgress.current = false;
+        }
         
       }, 1500);
       

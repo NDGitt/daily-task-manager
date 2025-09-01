@@ -837,14 +837,14 @@ export class DatabaseService {
       .select('id')
       .eq('user_id', userId)
       .eq('attempt_date', today)
-      .single();
+      .limit(1);
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+    if (error) {
       console.error('Error checking carry-over attempts:', error);
       return false;
     }
 
-    return !!data;
+    return data && data.length > 0;
   }
 
   static async recordCarryOverAttempt(userId: string): Promise<void> {
